@@ -1,0 +1,8 @@
+[text]
+font = /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
+size = 32
+color = #e0e0e0
+
+[homeassistant]
+token = secret
+url = http://homeassistant.url:8123/api/tts_get_url

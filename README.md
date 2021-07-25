@@ -36,5 +36,5 @@ edit settings to change font, color, etc..
 `curl http://localhost:5000/text -X DELETE -v`
 
 # TODO
-* add more effects and animations
+* add more text effects and animations
 * accept gif as another REST endpoint
