@@ -11,12 +11,15 @@ I'm using [Pirate Audio Speaker](https://shop.pimoroni.com/products/pirate-audio
 ## tts (optional)
 * homeassistant
 
-this project makes use of [google_translate](https://www.home-assistant.io/integrations/tts/) platform from homeassistant via REST api
+this project makes use of [google_translate](https://www.home-assistant.io/integrations/tts/) platform from homeassistant
 
 ## installation
 using pipenv to create virtualenv and install all dependencies from Pipfile
 
-`pipenv install`
+```
+export CFLAGS=-fcommon # for RPI.GPIO
+pipenv install
+```
 
 ## configuration
 edit settings to change font, color, etc..
