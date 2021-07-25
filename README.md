@@ -1,5 +1,6 @@
 # bulletin
 build a bulletin board on Raspberry Pi, which is able to show custom message and read TTS from REST api
+
 ![demo](demo.gif)
 
 ## hardware
