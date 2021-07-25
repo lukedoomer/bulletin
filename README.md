@@ -1,4 +1,4 @@
-# bulletin
+# bulletin-rpi
 build a bulletin board on Raspberry Pi, which is able to show custom message and read TTS from REST api
 
 ![demo](demo.gif)
@@ -34,3 +34,7 @@ edit settings to change font, color, etc..
 
 ## request to blank LCD
 `curl http://localhost:5000/text -X DELETE -v`
+
+# TODO
+* add more effects and animations
+* accept gif as another REST endpoint
