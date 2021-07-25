@@ -45,12 +45,11 @@ class LCD:
         offset = int(self.config.getint('text', 'size') / 4)    # offset of moving text animation
         
         while True:
-            if time.localtime().tm_sec % 10 == 0:   # avoid screen burn-in
+            if time.localtime().tm_sec % 20 == 0:   # avoid screen burn-in
                 self.blank()
                 
             else:
-                if time.localtime().tm_sec % 2 == 0:
-                    offset = - offset
+                offset = - offset
 
                 self.draw.rectangle((0, 0, self.disp.width, self.disp.height), (0, 0, 0))
                 self.draw.text(
