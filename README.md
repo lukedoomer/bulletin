@@ -1,5 +1,6 @@
 # bulletin
 build a bulletin board on Raspberry Pi, which is able to show custom message and read TTS from REST api
+![demo](demo.gif)
 
 ## hardware
 * RPi
@@ -8,7 +9,7 @@ build a bulletin board on Raspberry Pi, which is able to show custom message and
 
 I'm using [Pirate Audio Speaker](https://shop.pimoroni.com/products/pirate-audio-mini-speaker) for both video and audio output
 
-## tts (optional)
+## TTS (optional)
 * homeassistant
 
 this project makes use of [google_translate](https://www.home-assistant.io/integrations/tts/) platform from homeassistant
