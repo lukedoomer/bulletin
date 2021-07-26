@@ -29,10 +29,10 @@ edit settings to change font, color, etc..
 ## run
 `pipenv run python3 rest.py settings`
 
-## request to show text
+## POST method to show text
 `curl http://localhost:5000/text -d "content=hello world" -X POST -v`
 
-## request to blank LCD
+## DELETE method to blank LCD
 `curl http://localhost:5000/text -X DELETE -v`
 
 # TODO

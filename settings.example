@@ -1,6 +1,6 @@
 [text]
 font = /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
-size = 32
+size = 28
 color = #e0e0e0
 
 [homeassistant]
