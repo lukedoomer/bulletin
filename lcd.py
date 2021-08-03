@@ -1,19 +1,16 @@
-import time, ST7789, textwrap, requests, json
+import time, ST7789, textwrap, json
 import RPi.GPIO as GPIO
 
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from pydub import AudioSegment
-from pydub.playback import play
-
 from tempfile import NamedTemporaryFile
 
 class LCD:
     def __init__(self, config):
         self.config = config
-        
+
         # Create TFT LCD display class.
         self.disp = ST7789.ST7789(
             rotation = 270,
@@ -25,43 +22,44 @@ class LCD:
             offset_left = 0
         )
         # Initialize display.
-        self.blank()
+        self.drawblank()
 
-    def tts(self, content):
-        headers = {'Authorization': 'Bearer {}'.format(self.config['homeassistant']['token'])}
-        data = {'message': content, 'platform': 'google_translate', 'language': 'zh-tw'}
-        r = requests.post(self.config['homeassistant']['url'], headers=headers, json=data)
+        self.font = ImageFont.truetype(self.config['text']['font'], self.config.getint('text', 'size'))
+        self.offset = self.config.getint('text', 'offset')
 
-        file = NamedTemporaryFile()
-        with open(file.name, "wb") as fp:
-            r = requests.get(r.json()['url'])
-            fp.write(r.content)
-        sound = AudioSegment.from_file(file.name, format="mp3")
-        play(sound)
-        
-    def showtext(self, content):
-        font = ImageFont.truetype(self.config['text']['font'], self.config.getint('text', 'size'))
+        self.gif = Image.open(self.config['background']['gif'])
+        self.frame = 0
+
+    def drawgif(self):
+        self.frame += 1
+        try:
+            self.gif.seek(self.frame)
+        except EOFError:
+            self.frame = 0
+        self.img = self.gif.resize((self.disp.width, self.disp.height))
+        self.draw = ImageDraw.Draw(self.img)
+
+    def showtext(self, content, bg):
+        if bg:
+            self.drawgif()
+        else:
+            self.drawblank()
+
         content = textwrap.fill(text = content, width = int(self.disp.width / self.config.getint('text', 'size') / 0.8))
-        offset = int(self.config.getint('text', 'size') / 4)    # offset of moving text animation
-        
-        while True:
-            if time.localtime().tm_sec % 20 == 0:   # avoid screen burn-in
-                self.blank()
-                
-            else:
-                offset = - offset
+        self.offset = - self.offset
 
-                self.draw.rectangle((0, 0, self.disp.width, self.disp.height), (0, 0, 0))
-                self.draw.text(
-                    xy = (self.disp.width / 2 + offset, self.disp.height / 2),
-                    text = content,
-                    font = font,
-                    fill = self.config['text']['color'],
-                    anchor = 'mm')
-                self.disp.display(self.img)
-            time.sleep(1)
+        self.draw.text(
+            xy = (self.disp.width / 2 + self.offset, self.disp.height / 2),
+            text = content,
+            font = self.font,
+            fill = self.config['text']['color'],
+            anchor = 'mm')
+        self.disp.display(self.img)
 
-    def blank(self):
+    def drawblank(self):
         self.img = Image.new('RGB', (self.disp.width, self.disp.height), color=(0, 0, 0))
         self.draw = ImageDraw.Draw(self.img)
+
+    def showblank(self):
+        self.drawblank()
         self.disp.display(self.img)
