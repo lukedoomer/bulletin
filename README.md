@@ -30,7 +30,10 @@ edit settings to change font, color, etc..
 `pipenv run python3 rest.py settings`
 
 ## POST method to show text
+### using animated gif as background
 `curl http://localhost:5000/text -d "content=hello world" -X POST -v`
+### using plain black as background
+`curl http://localhost:5000/text -d "content=hello world" -d "bg=false" -X POST -v`
 
 ## DELETE method to blank LCD
 `curl http://localhost:5000/text -X DELETE -v`
