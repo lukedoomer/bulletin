@@ -1,8 +1,8 @@
-[text]
+[notify]
 font = /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
 size = 28
 color = #e0e0e0
-offset = 4  ; offset of moving text animation
+duration = 14
 
 [background]
 gif = animated.gif
@@ -11,3 +11,9 @@ interval = 1.0  ; frame rate
 [homeassistant]
 token = secret
 url = http://homeassistant.local:8123/api/tts_get_url
+
+[binance]
+api_key = key
+api_secret = secret
+update_interval = 60
+slide_interval = 10

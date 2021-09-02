@@ -4,16 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"rpi.gpio" = "*"
+"RPi.GPIO" = "*"
 spidev = "*"
-pillow = "*"
-st7789 = "*"
-flask = "*"
-flask-restful = "*"
+Pillow = "*"
+ST7789 = "*"
 requests = "*"
 numpy = "*"
 pydub = "*"
-apscheduler = "*"
+plotly = "*"
+kaleido = "==0.2.1"
+pandas = "*"
+python-binance = "*"
+flask-apscheduler = "*"
 
 [dev-packages]
 

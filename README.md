@@ -1,7 +1,8 @@
-# bulletin-rpi
-build a bulletin board on Raspberry Pi, which is able to show custom message and read TTS from REST api
+# multi-function bulletin-rpi
+build a multi-function bulletin board on Raspberry Pi, which is able to show candlestick charts of cryptocurrency, text notification, and read TTS from REST api
 
-![demo](demo.gif)
+![charts](chartsS.gif)
+![notify](notify.gif)
 
 ## hardware
 * RPi
@@ -24,20 +25,22 @@ pipenv install
 ```
 
 ## configuration
-edit settings to change font, color, etc..
+* edit settings to change notification font, color, etc..
+* set your [binance api](https://www.binance.com/en/my/settings/api-management) key to get crypto info
 
 ## run
-`pipenv run python3 rest.py settings`
+`pipenv run python3 rest.py`
 
-## POST method to show text
+## POST endpoint to show text
 ### using animated gif as background
-`curl http://localhost:5000/text -d "content=hello world" -X POST -v`
-### using plain black as background
-`curl http://localhost:5000/text -d "content=hello world" -d "bg=false" -X POST -v`
+`curl http://localhost:5000/notify -d "text=hello world" -X POST`
 
-## DELETE method to blank LCD
-`curl http://localhost:5000/text -X DELETE -v`
+## GET endpoint to show cryptocurrency (pairs split by comma)
+`curl http://localhost:5000/crypto?pair=BTCBUSD,ETHBUSD,BNBBUSD`
+![chart](chart.png)
+
+## GET endpoint to blank LCD
+`curl http://localhost:5000/clear`
 
 # TODO
-* add more text effects and animations
-* accept gif as another REST endpoint
+* add clock

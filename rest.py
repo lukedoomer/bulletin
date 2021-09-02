@@ -1,52 +1,84 @@
 import sys, configparser, datetime
+from datetime import datetime, timedelta
 from lcd import LCD
 from homeassistant import homeassistant
+from crypto import crypto
 
-from flask import Flask
-from flask_restful import reqparse, abort, Api, Resource, inputs
+from flask import Flask, request
+from flask_apscheduler import APScheduler
+from apscheduler.events import EVENT_JOB_EXECUTED
 
-from apscheduler.schedulers.background import BackgroundScheduler
+app = Flask(__name__)
 
-class ShowText(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('content')
-    parser.add_argument('bg', type=inputs.boolean, default=True)
+config = configparser.ConfigParser(inline_comment_prefixes=';')
+config.read('settings')
 
-    scheduler = BackgroundScheduler()
-    scheduler.start()
+lcd = LCD(config)
 
-    def __init__(self, **kwargs):
-        self.lcd = kwargs['lcd']
+scheduler = APScheduler()
 
-    def post(self):
-        self.delete()
-        args = ShowText.parser.parse_args()
-        ShowText.scheduler.add_job(homeassistant.tts,
-            'date', run_date=datetime.datetime.now(),
-            args=[self.lcd.config['homeassistant']['url'], self.lcd.config['homeassistant']['token'], args['content']])   # comment out if you don't have homeassistant installed
-        ShowText.scheduler.add_job(self.lcd.showtext,
-            'interval', seconds=self.lcd.config.getfloat('background', 'interval'),
-            args=[args['content'], args['bg']], id='showtext')
-        ShowText.scheduler.add_job(self.lcd.showblank, 'interval', minutes=1, id='showblank')   # avoid screen burn-in
-        return args['content'], 201
+def listener(event):
+    if 'candles' in event.job_id:
+        lcd.images = list(event.retval.values())
 
-    def delete(self):
-        for job in ShowText.scheduler.get_jobs():
-            job.remove()
-        self.lcd.showblank()
-        return '', 204
+@app.route("/clear", methods=['GET'])
+def remove_job():
+    for job in scheduler.get_jobs():
+        job.remove()
+    lcd.show_blank()
+    return '', 204
 
+@app.route("/crypto", methods=['GET'])
+def show_candles():
+    remove_job()
+    
+    pairs = request.args.get('pair').split(',')
+
+    scheduler.add_job(func=crypto.update_candles,
+        trigger='date',
+        run_date=datetime.now(),
+        id='init_candles',
+        args=[config['binance']['api_key'], config['binance']['api_secret'], pairs])
+
+    scheduler.add_job(func=lcd.show_batch_images,
+        trigger='interval', seconds=config.getint('binance', 'slide_interval'),
+        id='show_image')
+
+    scheduler.add_job(func=crypto.update_candles,
+        trigger='interval', seconds=config.getint('binance', 'update_interval'),
+        id='update_candles',
+        args=[config['binance']['api_key'], config['binance']['api_secret'], pairs])
+        
+    return request.args.get('pair'), 200
+
+@app.route("/notify", methods=['POST'])
+def show_text():
+    text = request.form.get('text')
+    now = datetime.now()
+    end = now + timedelta(seconds=config.getint('notify', 'duration'))
+
+    job = scheduler.get_job('show_image')
+    if job:
+        job.reschedule(trigger='interval',
+            seconds=config.getint('binance', 'slide_interval'),
+            start_date=end)
+    scheduler.add_job(func=homeassistant.tts,
+        trigger='date',
+        run_date=now,
+        id='tts',
+        args=[config['homeassistant']['url'], config['homeassistant']['token'], text])   # comment out if you don't have homeassistant installed
+    scheduler.add_job(func=lcd.show_text_on_gif,
+        trigger='interval',
+        seconds=lcd.config.getfloat('background', 'interval'),
+        end_date=end,
+        id='show_text',
+        args=[text])
+
+    return text, 201
 
 if __name__ == '__main__':
-    config = configparser.ConfigParser(inline_comment_prefixes=';')
-    config.read(sys.argv[1])
-
-    app = Flask(__name__)
-    api = Api(app)
-
-    ##
-    ## Actually setup the Api resource routing here
-    ##
-    api.add_resource(ShowText, '/text', resource_class_kwargs={ 'lcd': LCD(config) })
-
+    scheduler.api_enabled = True
+    scheduler.init_app(app)
+    scheduler.add_listener(listener, EVENT_JOB_EXECUTED)
+    scheduler.start()
     app.run(host='0.0.0.0', debug=True)
