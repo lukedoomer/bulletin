@@ -34,7 +34,7 @@ class crypto:
             fig.update_layout(title='<b>{}    {:.3f}</b>'.format(pair, price), titlefont_color='#FFFFFF', titlefont_size=58, title_x=0.5)
             fig.update_layout(paper_bgcolor='#000000', plot_bgcolor='#000000')
             fig.update_layout(xaxis_rangeslider_visible=False)
-            fig.update_xaxes(gridcolor='rgb(160, 160, 160)', color='#FFFFFF', tickfont_size=28, gridwidth=2, tickformat='%H:%M')
+            fig.update_xaxes(gridcolor='rgb(160, 160, 160)', color='#FFFFFF', tickfont_size=28, gridwidth=2, type='date', tickformat='%H:%M')
             fig.update_yaxes(gridcolor='rgb(160, 160, 160)', color='#FFFFFF', tickfont_size=28, gridwidth=2)
 
             file = NamedTemporaryFile()

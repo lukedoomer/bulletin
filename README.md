@@ -1,7 +1,7 @@
 # multi-function bulletin-rpi
-build a multi-function bulletin board on Raspberry Pi, which is able to show candlestick charts of cryptocurrency, text notification, and read TTS from REST api
+build a multi-function bulletin board on Raspberry Pi, which is able to show candlestick charts of cryptocurrency(bitcoin ticker), text notification, and read TTS from REST api
 
-![charts](chartsS.gif)
+![charts](charts.gif)
 ![notify](notify.gif)
 
 ## hardware
@@ -37,6 +37,7 @@ pipenv install
 
 ## GET endpoint to show cryptocurrency (pairs split by comma)
 `curl http://localhost:5000/crypto?pair=BTCBUSD,ETHBUSD,BNBBUSD`
+### 1H candlestick chart in last 24 hour period
 ![chart](chart.png)
 
 ## GET endpoint to blank LCD
