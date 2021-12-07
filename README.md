@@ -31,8 +31,11 @@ pipenv install
 ## run
 `pipenv run python3 rest.py`
 
+## POST endpoint to upload animated gif and show each frame per interval (optional)
+`curl http://localhost:5000/upload -F file=@<filename.gif> -F interval=<seconds>`
+
 ## POST endpoint to show text
-### using animated gif as background
+### using animated gif as background (set background filename in settings)
 `curl http://localhost:5000/notify -d "text=hello world" -X POST`
 
 ## GET endpoint to show cryptocurrency (pairs split by comma)

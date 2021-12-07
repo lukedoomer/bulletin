@@ -32,8 +32,12 @@ class LCD:
         self.images_index = 0
         self.images = list()
 
+    def set_images(self, images):
+        for i in range(len(images)):
+            images[i] = images[i].resize((self.disp.width, self.disp.height))
+        self.images = images
+
     def show_image(self, image):
-        image = image.resize((self.disp.width, self.disp.height))
         self.disp.display(image)
 
     def show_batch_images(self):
@@ -48,7 +52,7 @@ class LCD:
             self.gif_index = 0
         image = self.gif[self.gif_index].copy()
         self.draw_text(text, bg=image)
-        self.disp.display(image)
+        self.show_image(image)
         self.gif_index += 1
 
     def show_text_on_blank(self, text):

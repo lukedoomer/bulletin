@@ -8,6 +8,9 @@ from flask import Flask, request
 from flask_apscheduler import APScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED
 
+from tempfile import NamedTemporaryFile
+from PIL import Image, ImageSequence
+
 app = Flask(__name__)
 
 config = configparser.ConfigParser(inline_comment_prefixes=';')
@@ -19,7 +22,7 @@ scheduler = APScheduler()
 
 def listener(event):
     if 'candles' in event.job_id:
-        lcd.images = list(event.retval.values())
+        lcd.set_images(list(event.retval.values()))
 
 @app.route("/clear", methods=['GET'])
 def remove_job():
@@ -42,7 +45,7 @@ def show_candles():
 
     scheduler.add_job(func=lcd.show_batch_images,
         trigger='interval', seconds=config.getint('binance', 'slide_interval'),
-        id='show_image')
+        id='show_candles')
 
     scheduler.add_job(func=crypto.update_candles,
         trigger='interval', seconds=config.getint('binance', 'update_interval'),
@@ -51,17 +54,49 @@ def show_candles():
         
     return request.args.get('pair'), 200
 
+@app.route("/upload", methods=['POST'])
+def upload_gif():
+    interval = 1.0
+    if 'interval' in request.form:
+        interval = float(request.form.get('interval'))
+
+    file = request.files['file']
+    if file:
+        tmpfile = NamedTemporaryFile()
+        file.save(tmpfile.name)
+
+        images = list()
+        for frame in ImageSequence.Iterator(Image.open(tmpfile.name)):
+            images.append(frame.copy())
+        lcd.set_images(images)
+
+        remove_job()
+
+        scheduler.add_job(func=lcd.show_batch_images,
+            trigger='interval', seconds=interval,
+            id='show_images')
+
+        return tmpfile.name, 201
+    else:
+        return '', 400
+
 @app.route("/notify", methods=['POST'])
 def show_text():
     text = request.form.get('text')
     now = datetime.now()
     end = now + timedelta(seconds=config.getint('notify', 'duration'))
 
-    job = scheduler.get_job('show_image')
+    job = scheduler.get_job('show_candles')
     if job:
         job.reschedule(trigger='interval',
-            seconds=config.getint('binance', 'slide_interval'),
+            seconds=job.trigger.interval.total_seconds(),
             start_date=end)
+    job = scheduler.get_job('show_images')
+    if job:
+        job.reschedule(trigger='interval',
+            seconds=job.trigger.interval.total_seconds(),
+            start_date=end)
+    
     scheduler.add_job(func=homeassistant.tts,
         trigger='date',
         run_date=now,
